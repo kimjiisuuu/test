@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.hellosoftware.dao.licenseMapper">
+
+    <!-- insert 메소드 -->
+    <insert id="insert" parameterType="licenseDto">
+        INSERT INTO LICENSE VALUES (#{idx}, #{schoolname}, #{schoolemail}, #{teacheremail}, #{schoolnumber}, #{licensename}, #{startdate}, #{enddate}, null)
+    </insert>
+
+    <!-- nextSeq 메소드 -->
+    <select id="nextSeq" resultType="int">
+        SELECT NVL(MAX(idx), 0) + 1 FROM license
+    </select>
+
+    <!-- selectList 메소드 -->
+    <select id="selectList" resultType="licenseDto">
+        SELECT * FROM license
+    </select>
+
+    <!-- selectOneList 메소드 -->
+    <select id="selectOneList" parameterType="String" resultType="licenseDto">
+        SELECT * FROM license WHERE schoolname = #{schoolname}
+    </select>
+
+    <!-- updatesenddate 메소드 -->
+    <update id="Updatesanddate">
+        UPDATE license
+        SET senddate = SYSDATE
+        WHERE schoolemail = #{schoolemail}
+    </update>
+
+<!-- 회원 삭제 -->
+    <delete id="delete" parameterType="int" >
+        DELETE FROM license
+        WHERE idx = #{idx}
+    </delete>
+
+
+    <!-- 페이지네이션(페이지 설정) 을 위한 select -->
+    <select id="pagelist" resultType="licenseDto">
+        SELECT *
+        FROM (
+        SELECT rownum r, f.*
+        FROM (
+        SELECT *
+        FROM LICENSE
+        <include refid="search"></include>
+        ORDER BY
+        <choose>
+            <when test="order == 'start_asc'">startdate ASC</when>
+            <when test="order == 'start_desc'">startdate DESC</when>
+            <when test="order == 'end_asc'">enddate ASC</when>
+            <when test="order == 'end_desc'">enddate DESC</when>
+            <otherwise>idx DESC</otherwise>
+        </choose>
+        ) f
+        )
+        WHERE r BETWEEN ((#{page} - 1) * 10) + 1 AND #{page} * 10
+    </select>
+
+
+
+
+
+
+    <select id="count" resultType="int">
+        SELECT count(*) FROM LICENSE
+        <include refid="search"></include>
+    </select>
+
+    <sql id="search">
+        <where>
+            <if test="types != null and types.length > 0">
+                <foreach collection="types"
+                         item="type" open="(" close=")" separator=" OR ">	/* separator 에 " OR " 을 쓸 때 공백이 없으면 xml 오류가 나온다. */
+                    <if test="type=='l'.toString()">licensename like '%' || #{keyword} || '%' </if>
+                    <if test="type=='s'.toString()">schoolname like '%' || #{keyword} || '%' </if>
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+
+    <update id ="update" parameterType="licenseDto">
+        <![CDATA[
+        UPDATE license
+        SET
+            schoolname = #{schoolname},
+            schoolemail = #{schoolemail},
+            teacheremail = #{teacheremail},
+            schoolnumber = #{schoolnumber},
+            licensename = #{licensename},
+            startdate = #{startdate},
+            enddate = #{enddate},
+            senddate = #{senddate}
+        WHERE idx = #{idx}
+        ]]>
+    </update>
+
+    <select id="selectOne" parameterType="int" resultType="licenseDto">
+        SELECT *
+        FROM license
+        WHERE idx = #{idx}
+    </select>
+
+</mapper>

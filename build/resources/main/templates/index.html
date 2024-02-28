@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>헬로 소프트 로그인 화면</title>
+</head>
+<body>
+<main>
+    <form th:action="@{/loginAction}" method="post">
+        아이디 : <input type="text" name="id"/><br/>
+        비밀번호 : <input type="password" name="password"/>
+        <button type="button" th:onclick="'func_login(' + ${loginError} + ')'">로그인</button>
+        <button type="reset">다시쓰기</button>
+    </form>
+</main>
+<script th:src="@{/js/login.js}"></script>
+
+<!--<script th:if="${loginError}">-->
+<!--    $(document).ready(function(){-->
+<!--        var loginError = true;  // Thymeleaf 변수를 JavaScript 변수로 전달-->
+<!--        func_check(loginError); // 로그인 함수 호출 및 변수 전달-->
+<!--    });-->
+<!--</script>-->
+</body>
+</html>

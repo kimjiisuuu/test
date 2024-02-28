@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/list.css}"/>
+    <title>라이센스 회원목록창</title>
+</head>
+<body>
+<div th:replace="header.html :: head"></div>
+<main>
+    <h3 style="text-align: center; padding: 30px;" th:width="1000px" th:height="50px">회원 조회</h3>
+    <form action="" method="get">
+        <div class="search">
+            <div>
+                <select class="form-select" id="type" name="type" onchange="changeType()">
+                    <option value="a">검색 카테고리</option>
+                    <option value="l" th:selected="${pageRequestDTO.type=='l'}">라이센스명</option>
+                    <option value="s" th:selected="${pageRequestDTO.type=='s'}">학교명</option>
+                    <option value="ls" th:selected="${pageRequestDTO.type=='ls'}">전체</option>
+                </select>
+            </div>
+            <div><input class="form-control" id="keyword" name="keyword" th:value="${pageRequestDTO.keyword}"></div>
+            <div class="input-group-append">
+                <button type="submit">검색</button>
+                <button type="button" onclick="resetSearch()">초기화</button>
+            </div>
+        </div>
+    </form>
+    <div id="list">
+        <table>
+            <tr>
+                <th>학교명</th>
+                <th>학교이메일</th>
+                <th>담당선생님 이메일</th>
+                <th>학교행정실 번호</th>
+                <th>라이센스명</th>
+                <th>구독 시작날짜
+                    <select class="form-select" id="start_order" name="start_order" onchange="sortByStartDate(this.value)">
+                        <option value="asc">오래된순 정렬</option>
+                        <option value="desc">최신순 정렬</option>
+                    </select>
+                </th>
+                <th>구독 종료날짜
+                    <select class="form-select" id="end_order" name="end_order" onchange="sortByEndDate(this.value)">
+                        <option value="asc">최신순 정렬</option>
+                        <option value="desc">오래된순 정렬</option>
+                    </select>
+                </th>
+
+                <th>메일보내기</th>
+                <th>최근 메일발송 날짜</th>
+            </tr>
+            <tr th:each="vo : ${searchlist.list}">
+                <td><a th:href="@{/member/listDetail(schoolname=${vo.schoolname})}" th:text="${vo.schoolname}"></a></td>
+                <td th:text="${vo.schoolemail}"></td>
+                <td th:text="${vo.teacheremail}"></td>
+                <td th:text="${vo.schoolnumber}"></td>
+                <td th:text="${vo.licensename}"></td>
+                <td th:text="${vo.startdate}"></td>
+                <td th:text="${vo.enddate}"></td>
+                <td>
+                    <form action="mail" method="post">
+                        <input type="hidden" name="schoolemail" th:value="${vo.schoolemail}" />
+                        <button type="submit">메일보내기</button>
+                    </form>
+                </td>
+                <td th:text="${vo.senddate}"></td>
+            </tr>
+        </table>
+
+    </div>
+    <div style="width:700px;margin: auto;padding: 10px;text-align: center;">
+        전체 글 개수 : [[${searchlist.totalCount }]] <br>
+        <hr>
+        <div th:with="start=${searchlist.startPage}, last=${searchlist.endPage}, totalPages=${searchlist.totalPage}" id="pagination">
+        <span th:if="${searchlist.startPage != 1}">
+            <a th:href="@{/member/list(page=1)}" th:data-num="1" class="btn btn-default">&lt;&lt;</a>
+            <a th:href="@{/member/list(page=${searchlist.startPage - 1})}" th:data-num="${searchlist.startPage - 1}" class="btn btn-default">&lt;</a>
+        </span>
+            <a th:class="${i == pageRequestDTO.page} ? 'btn text-primary' : 'btn'"
+               th:data-num="${i}" th:each="i: ${#numbers.sequence(start, (start + 4) > totalPages ? totalPages : (start + 4))}" th:href="@{/member/list(page=${i})}"
+               th:text="${i}"></a>
+            <span th:if="${last < searchlist.totalPage}">
+            <a th:href="@{/member/list(page=${last + 1})}" class="btn btn-default">&gt;</a>
+            <a th:href="@{/member/list(page=${searchlist.totalPage})}" th:data-num="${searchlist.totalPage}" class="btn btn-default">&gt;&gt;</a>
+        </span>
+        </div>
+        <span class="btn"> | 현재 페이지 번호 : [[${pageRequestDTO.page}]] | </span>
+    </div>
+
+</main>
+<div th:replace="footer.html :: footer"></div>
+<script src="../js/emailScript.js"></script>
+<script src="../js/jquery-3.7.1.min.js"></script>
+<script>
+    // 선택한 옵션에 따라 구독 시작날짜를 정렬하는 함수입니다.
+    // 구독 시작날짜에 대한 정렬 함수
+    function sortByStartDate(order) {
+        var rows = Array.from(document.querySelectorAll('#list table tr')).slice(1);
+        var tbody = document.querySelector('#list table tbody');
+        rows.sort((a, b) => {
+            var date1 = new Date(a.cells[5].innerText); // 여기 숫자는 시작날짜가 있는 열번호에 맞게 수정하세요
+            var date2 = new Date(b.cells[5].innerText);
+            if (order === 'asc') {
+                return date1 - date2; // 오래된순 정렬
+            } else if (order === 'desc') {
+                return date2 - date1; // 최신순 정렬
+            }
+        });
+        rows.forEach(row => {
+            tbody.appendChild(row);
+        });
+    }
+
+    // 구독 종료날짜에 대한 정렬 함수
+    function sortByEndDate(order) {
+        var rows = Array.from(document.querySelectorAll('#list table tr')).slice(1);
+        var tbody = document.querySelector('#list table tbody');
+        rows.sort((a, b) => {
+            var date1 = new Date(a.cells[6].innerText); // 여기 숫자는 종료날짜가 있는 열번호에 맞게 수정하세요
+            var date2 = new Date(b.cells[6].innerText);
+            if (order === 'asc') {
+                return date1 - date2; // 오래된순 정렬
+            } else if (order === 'desc') {
+                return date2 - date1; // 최신순 정렬
+            }
+        });
+        rows.forEach(row => {
+            tbody.appendChild(row);
+        });
+    }
+
+</script>
+
+</body>
+</html>

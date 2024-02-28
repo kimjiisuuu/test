@@ -1,0 +1,68 @@
+@charset "UTF-8";
+body {
+   margin:0;
+}
+header {
+   background-color: #ffffff;
+   color : black;
+   padding-top: 0.1px;
+}
+h2.mainh2{
+   text-align: left;
+}
+h2,h3,h4 {
+   text-align: center;
+   padding: 30px;
+}
+ul {
+   list-style: none;
+   overflow: hidden;
+   background-color:#8572EE;
+   margin: 0px;
+}
+/* 선택자 기호 : > 는 자식 요소 */
+ul > li {
+   float:left;
+}
+form {
+   margin: 20px;
+}
+ul a{
+   background-color: #8572EE;
+   display: block;
+   padding :20px;
+   text-decoration: none;
+   color: white;
+
+}
+/* 방문한 링크의 스타일 : visited 하고 hover 순서대로 설정 */
+a:visited {
+   color : white;
+}
+/* 가상 선택자 : hover는 마우스 올릴때 동작하는 css */
+a:hover {
+   color: aqua;
+   cursor: pointer;
+}
+nav{  background-color: #131789;}
+main{
+   background-color: whitesmoke;
+   height: 500px;
+   padding: 20px;
+   clear:left;   /* float:left; 적용 없애기 */
+}
+footer{
+   background-color: #ffffff;
+   color:black;
+   padding: 20px;
+
+}
+
+.select {
+   text-align: center;
+}
+
+.select div {
+   display: inline-block;
+   margin-right: 10px;
+}
